@@ -99,10 +99,16 @@ color PositionalLight::illuminate(const glm::vec3 &interceptWorldCoords,
 									const glm::vec3 &normal,
 									const Material &material,
 									const Frame &eyeFrame, bool inShadow) const {
-	glm::vec3 v = eyeFrame.origin - interceptWorldCoords;
-	if (!isOn || inShadow) return ambientColor(material.ambient, this->lightColorComponents.ambient);
-	else if (!inShadow) return totalColor(material, this->lightColorComponents, v, normal, 
+
+	glm::vec3 v = glm::normalize(eyeFrame.origin - interceptWorldCoords);
+
+	if (!isOn || inShadow) {
+		return ambientColor(material.ambient, this->lightColorComponents.ambient);
+	}
+	else if (!inShadow) {
+		return totalColor(material, this->lightColorComponents, v, normal,
 			this->lightPosition, interceptWorldCoords, this->attenuationIsTurnedOn, this->attenuationParams);
+	}
 }
 
 /**

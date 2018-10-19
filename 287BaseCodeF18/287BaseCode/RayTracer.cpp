@@ -52,14 +52,24 @@ color RayTracer::traceIndividualRay(const Ray &ray, const IScene &theScene, int 
 	
 
 	if (theHit.t < FLT_MAX) {
-		Ray r(theHit.interceptPoint, glm::normalize(theScene.lights[0]->lightPosition - theHit.interceptPoint));
-		HitRecord shadow = VisibleIShape::findIntersection(r, theScene.visibleObjects);
-		if (shadow.t < FLT_MAX && shadow.t > 0.0001f) {
+		Ray shadowR(theHit.interceptPoint, glm::normalize(theScene.lights[0]->lightPosition - theHit.interceptPoint));
+		HitRecord shadow = VisibleIShape::findIntersection(shadowR, theScene.visibleObjects);
+
+		if (theHit.texture != nullptr) {  // if object has a texture, use it
+			float u = glm::clamp(theHit.u, 0.0f, 1.0f);
+			float v = glm::clamp(theHit.v, 0.0f, 1.0f);
+			result = theHit.texture->getPixel(u, v);
+		}
+
+		/*if (shadow.t < FLT_MAX && shadow.t > 0.0001f) {
 			result = ambientColor(theHit.material.ambient, theScene.lights[0]->lightColorComponents.ambient);
 			// result = totalColor(theHit.material, theScene.lights[0]->lightColorComponents, ray.direction, theHit.surfaceNormal, theScene.lights[0]->lightPosition, theHit.interceptPoint, theScene.lights[0]->attenuationIsTurnedOn, theScene.lights[0]->attenuationParams);
 			// result += totalColor(theHit.material, theScene.lights[1]->lightColorComponents, ray.direction, theHit.surfaceNormal, theScene.lights[1]->lightPosition, theHit.interceptPoint, theScene.lights[1]->attenuationIsTurnedOn, theScene.lights[1]->attenuationParams);
-		}
+		}*/
 		else {
+
+			result = illuminate(theHit.interceptPoint, theHit.surfaceNormal, theHit.material, Frame(), false);
+
 			result = totalColor(theHit.material, theScene.lights[0]->lightColorComponents, ray.direction, theHit.surfaceNormal, theScene.lights[0]->lightPosition, theHit.interceptPoint, theScene.lights[0]->attenuationIsTurnedOn, theScene.lights[0]->attenuationParams);
 			// result = ambientColor(theHit.material.ambient, theScene.lights[0]->lightColorComponents.ambient);
 		}
