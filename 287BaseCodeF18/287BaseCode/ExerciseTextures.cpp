@@ -39,7 +39,7 @@ void buildScene() {
 	IShapePtr cylinder = new ICylinderY(glm::vec3(0, 0, 0), 6.0f, 15.0f);
 	//IShapePtr cylinder = new ISphere(glm::vec3(0, 0, 0), 6);
 	VisibleIShapePtr p;
-	theScene.addObject(p = new VisibleIShape(cylinder, gold));
+	theScene.addObject(p = new VisibleIShape(cylinder, tin));
 	p->setTexture(&im);
 	theScene.addObject(posLight);
 }

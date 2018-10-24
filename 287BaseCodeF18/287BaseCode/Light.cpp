@@ -42,7 +42,7 @@ color diffuseColor(const color &mat, const color &light,
 color specularColor(const color &mat, const color &light,
 					float shininess,
 					const glm::vec3 &r, const glm::vec3 &v) {
-	return light * mat * glm::pow(glm::max(0.0f, glm::dot(r, v)), shininess);
+	return light * mat * glm::pow(glm::max(0.0f, glm::dot(v, -r)), shininess);
 }
 
 /**
@@ -101,12 +101,12 @@ color PositionalLight::illuminate(const glm::vec3 &interceptWorldCoords,
 									const Frame &eyeFrame, bool inShadow) const {
 
 	glm::vec3 v = glm::normalize(eyeFrame.origin - interceptWorldCoords);
-
+	
 	if (!isOn || inShadow) {
 		return ambientColor(material.ambient, this->lightColorComponents.ambient);
 	}
 	else if (!inShadow) {
-		return totalColor(material, this->lightColorComponents, v, normal,
+		return totalColor(material, this->lightColorComponents, -v, normal,
 			this->lightPosition, interceptWorldCoords, this->attenuationIsTurnedOn, this->attenuationParams);
 	}
 }

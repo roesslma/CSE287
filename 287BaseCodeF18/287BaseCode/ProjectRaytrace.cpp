@@ -51,10 +51,10 @@ void resize(int width, int height) {
 	glutPostRedisplay();
 } 
 
-ISphere *sphere = new ISphere(glm::vec3(-4.0f, 5.0f, 5.0f), 2.0f);
+ISphere *sphere = new ISphere(glm::vec3(-4.0f, 1.0f, 5.0f), 2.0f);
 IShape *plane = new IPlane(glm::vec3(0.0f, -2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-IEllipsoid *ellipsoid = new IEllipsoid(glm::vec3(4.0f, 5.0f, 5.0f), glm::vec3(2.0f, 1.0f, 2.0f));
-ICylinderY *cyl = new ICylinderY(glm::vec3(13.0f, -1.0f, 5.0f), 3.0f, 2.0f);
+IEllipsoid *ellipsoid = new IEllipsoid(glm::vec3(4.0f, 1.0f, 5.0f), glm::vec3(2.0f, 1.0f, 2.0f));
+ICylinderY *cyl = new ICylinderY(glm::vec3(13.0f, 2.0f, 5.0f), 3.0f, 8.0f);
 
 void buildScene() {
 	scene.addObject(new VisibleIShape(plane, tin));
