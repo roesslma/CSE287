@@ -104,6 +104,8 @@ color PositionalLight::illuminate(const glm::vec3 &interceptWorldCoords,
 	
 	if (!isOn || inShadow) {
 		return ambientColor(material.ambient, this->lightColorComponents.ambient);
+		/*return totalColor(material, this->lightColorComponents, -v, normal,
+			this->lightPosition, interceptWorldCoords, this->attenuationIsTurnedOn, this->attenuationParams);*/
 	}
 	else if (!inShadow) {
 		return totalColor(material, this->lightColorComponents, -v, normal,
@@ -125,8 +127,18 @@ color SpotLight::illuminate(const glm::vec3 &interceptWorldCoords,
 							const glm::vec3 &normal,
 							const Material &material,
 							const Frame &eyeFrame, bool inShadow) const {
-	if (!isOn) return black;
-	return material.ambient;
+
+	glm::vec3 v = glm::normalize(eyeFrame.origin - interceptWorldCoords);
+	glm::vec3 l = glm::normalize(interceptWorldCoords - this->lightPosition);
+	// this->spotDirection
+
+	if (!isOn || inShadow || glm::dot(this->spotDirection, l) > (this->fov / 2.0f)) {
+		return ambientColor(material.ambient, this->lightColorComponents.ambient);
+	}
+	else if (!inShadow) {
+		return totalColor(material, this->lightColorComponents, -v, normal,
+			this->lightPosition, interceptWorldCoords, this->attenuationIsTurnedOn, this->attenuationParams);
+	}
 }
 
 /**

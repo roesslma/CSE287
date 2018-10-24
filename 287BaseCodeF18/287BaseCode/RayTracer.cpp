@@ -27,17 +27,17 @@ void RayTracer::raytraceScene(FrameBuffer &frameBuffer, int depth,
 
 	for (int y = 0; y < frameBuffer.getWindowHeight(); ++y) {
 		for (int x = 0; x < frameBuffer.getWindowWidth(); ++x) {
-			float iterX = 1.0f / (camera.nx * 3), iterY = 1.0f / (camera.ny * 3);
+			float aa = 3, iterX = 1.0f / (camera.nx * aa), iterY = 1.0f / (camera.ny * aa);
 			color colorForPixel;
 			for (int i = -1; i < 2; i++) {
 				for (int j = -1; j < 2; j++) {
 					Ray ray = camera.getRay((float)x + (i * iterX), (float)y + (j * iterY));
-					colorForPixel += traceIndividualRay(ray, theScene, depth);
+					colorForPixel = colorForPixel + traceIndividualRay(ray, theScene, depth) * 1.0f/(aa*aa);
 				}
 			}
-			// Ray ray = camera.getRay((float)x, (float)y);
-			
-			frameBuffer.setColor(x, y, colorForPixel * 0.1112f);
+			//Ray ray = camera.getRay((float)x, (float)y);
+			//colorForPixel = traceIndividualRay(ray, theScene, 1);
+			frameBuffer.setColor(x, y, colorForPixel);
 		}
 	}
 
@@ -56,8 +56,6 @@ void RayTracer::raytraceScene(FrameBuffer &frameBuffer, int depth,
 color RayTracer::traceIndividualRay(const Ray &ray, const IScene &theScene, int recursionLevel) const {
 	HitRecord theHit = VisibleIShape::findIntersection(ray, theScene.visibleObjects);
 	color result;
-	
-	
 
 	if (theHit.t < FLT_MAX) {
 
@@ -76,31 +74,22 @@ color RayTracer::traceIndividualRay(const Ray &ray, const IScene &theScene, int 
 				float v = glm::clamp(theHit.v, 0.0f, 1.0f);
 				result += theHit.texture->getPixel(u, v) * theScene.lights[i]->illuminate(theHit.interceptPoint, theHit.surfaceNormal, theHit.material, f, inShadow);
 			}
-
-			/*if (shadow.t < FLT_MAX && shadow.t > 0.01f) {
-			result = ambientColor(theHit.material.ambient, theScene.lights[0]->lightColorComponents.ambient);
-			// result = totalColor(theHit.material, theScene.lights[0]->lightColorComponents, ray.direction, theHit.surfaceNormal, theScene.lights[0]->lightPosition, theHit.interceptPoint, theScene.lights[0]->attenuationIsTurnedOn, theScene.lights[0]->attenuationParams);
-			// result += totalColor(theHit.material, theScene.lights[1]->lightColorComponents, ray.direction, theHit.surfaceNormal, theScene.lights[1]->lightPosition, theHit.interceptPoint, theScene.lights[1]->attenuationIsTurnedOn, theScene.lights[1]->attenuationParams);
-			}*/
 			else {
 				result += theScene.lights[i]->illuminate(theHit.interceptPoint, theHit.surfaceNormal, theHit.material, f, inShadow);
-				
-				// result = totalColor(theHit.material, theScene.lights[0]->lightColorComponents, ray.direction, theHit.surfaceNormal, theScene.lights[0]->lightPosition, theHit.interceptPoint, theScene.lights[0]->attenuationIsTurnedOn, theScene.lights[0]->attenuationParams);
-				// result = ambientColor(theHit.material.ambient, theScene.lights[0]->lightColorComponents.ambient);
 			}
 		}
-
-		
-		
-		// result += illuminate(theHit.interceptPoint, theHit.surfaceNormal, theHit.material, Frame, false);
 	}
 	else {
-		// result = ambientColor(theHit.material.ambient, theScene.lights[0]->lightColorComponents.ambient);
-		// result += ambientColor(theHit.material.ambient, theScene.lights[1]->lightColorComponents.ambient);
 		result = defaultColor;
+		recursionLevel = 0;
 	}
+
 	if (recursionLevel != 0) {
-		result *= traceIndividualRay(Ray(theHit.interceptPoint, ray.direction - 2 * glm::dot(ray.direction, theHit.surfaceNormal)), theScene, recursionLevel - 1);
+		glm::vec3 offsetpoint = IShape::movePointOffSurface(theHit.interceptPoint, theHit.surfaceNormal);
+//		HitRecord theHit2 = VisibleIShape::findIntersection(ray, theScene.visibleObjects);
+		color reflectedColor = traceIndividualRay(Ray(offsetpoint, ray.direction - 2 * glm::dot(ray.direction, theHit.surfaceNormal)), theScene, recursionLevel - 1);
+		result = 0.5f * result + 0.5f * reflectedColor;
+
 	}
 	
 	return glm::clamp(result, { 0 }, { 1 });

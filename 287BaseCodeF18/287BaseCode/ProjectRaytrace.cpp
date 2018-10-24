@@ -51,16 +51,18 @@ void resize(int width, int height) {
 	glutPostRedisplay();
 } 
 
-ISphere *sphere = new ISphere(glm::vec3(-4.0f, 1.0f, 5.0f), 2.0f);
+ISphere *sphere = new ISphere(glm::vec3(0.0f, 0.0f, 0.0f), 2.0f);
+ISphere *sphere2 = new ISphere(glm::vec3(3.0f, 0.0f, 3.0f), 2.0f);
 IShape *plane = new IPlane(glm::vec3(0.0f, -2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 IEllipsoid *ellipsoid = new IEllipsoid(glm::vec3(4.0f, 1.0f, 5.0f), glm::vec3(2.0f, 1.0f, 2.0f));
 ICylinderY *cyl = new ICylinderY(glm::vec3(13.0f, 2.0f, 5.0f), 3.0f, 8.0f);
 
 void buildScene() {
-	scene.addObject(new VisibleIShape(plane, tin));
+	scene.addObject(new VisibleIShape(sphere, tin));
+	//scene.addObject(new VisibleIShape(sphere2, bronze));
 
-	scene.addObject(new VisibleIShape(sphere, silver));
-	scene.addObject(new VisibleIShape(ellipsoid, redPlastic));
+//	scene.addObject(new VisibleIShape(sphere, silver));
+//	scene.addObject(new VisibleIShape(ellipsoid, redPlastic));
 	scene.addObject(new VisibleIShape(cyl, gold));
 
 	lights[0]->attenuationIsTurnedOn = true;
