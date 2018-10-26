@@ -29,14 +29,19 @@ void RayTracer::raytraceScene(FrameBuffer &frameBuffer, int depth,
 		for (int x = 0; x < frameBuffer.getWindowWidth(); ++x) {
 			float aa = 3, offsX = 1.0f / aa, offsY = 1.0f / aa;
 			color colorForPixel;
-			for (int i = -1; i < 2; ++i) {
-				for (int j = -1; j < 2; ++j) {
-					Ray ray = camera.getRay((float)x + (i * offsX), (float)y + (j * offsY));
-					colorForPixel = colorForPixel + traceIndividualRay(ray, theScene, 1) * 1.0f/(aa*aa);
+			if (aa == 3) {
+				for (int i = -1; i < 2; ++i) {
+					for (int j = -1; j < 2; ++j) {
+						Ray ray = camera.getRay((float)x + (i * offsX), (float)y + (j * offsY));
+						colorForPixel = colorForPixel + traceIndividualRay(ray, theScene, 1) * 1.0f / (aa*aa);
+					}
 				}
 			}
-			//Ray ray = camera.getRay((float)x, (float)y);
-			//colorForPixel = traceIndividualRay(ray, theScene, 1);
+			else {
+				Ray ray = camera.getRay((float)x, (float)y);
+				colorForPixel = traceIndividualRay(ray, theScene, 1);
+			}
+			
 			frameBuffer.setColor(x, y, colorForPixel);
 		}
 	}
