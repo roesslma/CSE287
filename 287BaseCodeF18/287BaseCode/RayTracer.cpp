@@ -27,12 +27,12 @@ void RayTracer::raytraceScene(FrameBuffer &frameBuffer, int depth,
 
 	for (int y = 0; y < frameBuffer.getWindowHeight(); ++y) {
 		for (int x = 0; x < frameBuffer.getWindowWidth(); ++x) {
-			float aa = 3, iterX = 1.0f / (camera.nx * aa), iterY = 1.0f / (camera.ny * aa);
+			float aa = 3, offsX = 1.0f / aa, offsY = 1.0f / aa;
 			color colorForPixel;
-			for (int i = -1; i < 2; i++) {
-				for (int j = -1; j < 2; j++) {
-					Ray ray = camera.getRay((float)x + (i * iterX), (float)y + (j * iterY));
-					colorForPixel = colorForPixel + traceIndividualRay(ray, theScene, depth) * 1.0f/(aa*aa);
+			for (int i = -1; i < 2; ++i) {
+				for (int j = -1; j < 2; ++j) {
+					Ray ray = camera.getRay((float)x + (i * offsX), (float)y + (j * offsY));
+					colorForPixel = colorForPixel + traceIndividualRay(ray, theScene, 1) * 1.0f/(aa*aa);
 				}
 			}
 			//Ray ray = camera.getRay((float)x, (float)y);
@@ -57,15 +57,17 @@ color RayTracer::traceIndividualRay(const Ray &ray, const IScene &theScene, int 
 	HitRecord theHit = VisibleIShape::findIntersection(ray, theScene.visibleObjects);
 	color result;
 
+	glm::vec3 offsetpoint = IShape::movePointOffSurface(theHit.interceptPoint, theHit.surfaceNormal);
+
 	if (theHit.t < FLT_MAX) {
 
-		for (int i = 0; i < theScene.lights.size(); i++) {
-			Ray shadowR(theHit.interceptPoint, glm::normalize(theScene.lights[i]->lightPosition - theHit.interceptPoint));
+		for (int i = 0; i < 1; i++) {//theScene.lights.size()
+			Ray shadowR(offsetpoint, glm::normalize(theScene.lights[i]->lightPosition - offsetpoint));
 			HitRecord shadow = VisibleIShape::findIntersection(shadowR, theScene.visibleObjects);
 			bool inShadow = false;
 			Frame f(ray.origin, theScene.camera->cameraFrame.u, theScene.camera->cameraFrame.v, theScene.camera->cameraFrame.w);
 
-			if (shadow.t < FLT_MAX && shadow.t > 0.001f) {
+			if (shadow.t < FLT_MAX && shadow.material.alpha == 1.0f) {
 				inShadow = true;
 			}
 
@@ -75,20 +77,28 @@ color RayTracer::traceIndividualRay(const Ray &ray, const IScene &theScene, int 
 				result += theHit.texture->getPixel(u, v) * theScene.lights[i]->illuminate(theHit.interceptPoint, theHit.surfaceNormal, theHit.material, f, inShadow);
 			}
 			else {
-				result += theScene.lights[i]->illuminate(theHit.interceptPoint, theHit.surfaceNormal, theHit.material, f, inShadow);
+
+				if (theHit.material.alpha < 1.0f) {
+					result += theHit.material.alpha * theScene.lights[i]->illuminate(theHit.interceptPoint, theHit.surfaceNormal, theHit.material, f, inShadow) + (1 - theHit.material.alpha) * traceIndividualRay(Ray(theHit.interceptPoint, ray.direction), theScene, recursionLevel);
+				}
+				else {
+					result += theScene.lights[i]->illuminate(theHit.interceptPoint, theHit.surfaceNormal, theHit.material, f, inShadow);
+				}
+				
 			}
 		}
 	}
 	else {
-		result = defaultColor;
+		result += defaultColor;
 		recursionLevel = 0;
 	}
 
 	if (recursionLevel != 0) {
-		glm::vec3 offsetpoint = IShape::movePointOffSurface(theHit.interceptPoint, theHit.surfaceNormal);
+		//glm::vec3 offsetpoint = IShape::movePointOffSurface(theHit.interceptPoint, theHit.surfaceNormal);
 //		HitRecord theHit2 = VisibleIShape::findIntersection(ray, theScene.visibleObjects);
-		color reflectedColor = traceIndividualRay(Ray(offsetpoint, ray.direction - 2 * glm::dot(ray.direction, theHit.surfaceNormal)), theScene, recursionLevel - 1);
-		result = 0.5f * result + 0.5f * reflectedColor;
+		
+		color reflectedColor = traceIndividualRay(Ray(offsetpoint, glm::normalize(ray.direction - 2 * glm::dot(ray.direction, theHit.surfaceNormal) * theHit.surfaceNormal)), theScene, recursionLevel - 1);
+		result += 0.7f * result + 0.3f * reflectedColor;
 
 	}
 	

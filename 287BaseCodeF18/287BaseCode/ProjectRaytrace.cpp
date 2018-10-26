@@ -17,27 +17,28 @@ bool isAnimated = false;
 int numReflections = 0;
 int antiAliasing = 1;
 bool twoViewOn = false;
+Image im("usflag.ppm");
 
 std::vector<PositionalLightPtr> lights = {
 						new PositionalLight(glm::vec3(10, 10, 10), pureWhiteLight),
-						new SpotLight(glm::vec3(2, 5, -2), glm::vec3(0,-1,0), glm::radians(45.0f), pureWhiteLight)
+						new SpotLight(glm::vec3(0, 10, 10), glm::vec3(0,-10,-1), glm::radians(10.0f), pureWhiteLight)
 };
 
 PositionalLightPtr posLight = lights[0];
 SpotLightPtr spotLight = (SpotLightPtr)lights[1];
 
 FrameBuffer frameBuffer(WINDOW_WIDTH, WINDOW_HEIGHT);
-RayTracer rayTrace(lightGray);
-PerspectiveCamera pCamera(glm::vec3(0, 10, 10), ORIGIN3D, Y_AXIS, M_PI_2);
-OrthographicCamera oCamera(glm::vec3(0, 10, 10), ORIGIN3D, Y_AXIS, 25.0f);
+RayTracer rayTrace(black);
+PerspectiveCamera pCamera(glm::vec3(-10, 10, -10), ORIGIN3D, Y_AXIS, M_PI_2);
+OrthographicCamera oCamera(glm::vec3(-10, 10, -10), ORIGIN3D, Y_AXIS, 25.0f);
 RaytracingCamera *cameras[] = { &pCamera, &oCamera };
 int currCamera = 0;
 IScene scene(cameras[currCamera], false);
 
 void render() {
 	int frameStartTime = glutGet(GLUT_ELAPSED_TIME);
-	cameras[currCamera]->calculateViewingParameters(frameBuffer.getWindowWidth()/2, frameBuffer.getWindowHeight());
-	cameras[currCamera]->changeConfiguration(glm::vec3(0, 15, 15), ORIGIN3D, Y_AXIS);
+	cameras[currCamera]->calculateViewingParameters(frameBuffer.getWindowWidth(), frameBuffer.getWindowHeight());
+	cameras[currCamera]->changeConfiguration(glm::vec3(0, 10, 25), ORIGIN3D, Y_AXIS);
 	rayTrace.raytraceScene(frameBuffer, numReflections, scene);
 
 	int frameEndTime = glutGet(GLUT_ELAPSED_TIME); // Get end time
@@ -51,19 +52,27 @@ void resize(int width, int height) {
 	glutPostRedisplay();
 } 
 
-ISphere *sphere = new ISphere(glm::vec3(0.0f, 0.0f, 0.0f), 2.0f);
-ISphere *sphere2 = new ISphere(glm::vec3(3.0f, 0.0f, 3.0f), 2.0f);
+ISphere *sphere = new ISphere(glm::vec3(15.0f, 3.0f, 10.0f), 5.0f);
+IDisk *disk = new IDisk(glm::vec3(15.0f, 0.0f, 10.0f), glm::vec3(0.0f, 1.0f, 0.0f), 2);
 IShape *plane = new IPlane(glm::vec3(0.0f, -2.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-IEllipsoid *ellipsoid = new IEllipsoid(glm::vec3(4.0f, 1.0f, 5.0f), glm::vec3(2.0f, 1.0f, 2.0f));
-ICylinderY *cyl = new ICylinderY(glm::vec3(13.0f, 2.0f, 5.0f), 3.0f, 8.0f);
+IShape *window = new IPlane(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+IEllipsoid *ellipsoid = new IEllipsoid(glm::vec3(15.0f, 2.0f, 0.0f), glm::vec3(3.0f, 4.0f, 3.0f));
+ICylinderX *cylX = new ICylinderX(glm::vec3(0.0f, 2.0f, -2.0f), 3.0f, 20.0f);
+ICylinderY *cylY = new ICylinderY(glm::vec3(-10.0f, 2.0f, 12.0f), 3.0f, 8.0f);
 
 void buildScene() {
-	scene.addObject(new VisibleIShape(sphere, tin));
-	//scene.addObject(new VisibleIShape(sphere2, bronze));
-
-//	scene.addObject(new VisibleIShape(sphere, silver));
-//	scene.addObject(new VisibleIShape(ellipsoid, redPlastic));
-	scene.addObject(new VisibleIShape(cyl, gold));
+	scene.addObject(new VisibleIShape(plane, tin));
+	VisibleIShapePtr t;
+	//scene.addObject(t = new VisibleIShape(window, emerald));
+	//scene.addObject(new VisibleIShape(disk, bronze));
+	VisibleIShapePtr p;
+	scene.addObject(new VisibleIShape(sphere, silver));
+	//scene.addObject(new VisibleIShape(ellipsoid, redPlastic));
+	scene.addObject(p = new VisibleIShape(cylX, gold));
+	scene.addObject(new VisibleIShape(cylY, polishedBronze));
+	
+	//t->material.makeTransparent(0.2, t->material.ambient);
+	p->setTexture(&im);
 
 	lights[0]->attenuationIsTurnedOn = true;
 	lights[1]->attenuationIsTurnedOn = true;

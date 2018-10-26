@@ -21,7 +21,7 @@ RaytracingCamera::RaytracingCamera(const glm::vec3 &viewingPos, const glm::vec3 
  */
 
 void RaytracingCamera::changeConfiguration(const glm::vec3 &viewingPos, const glm::vec3 &lookAtPt, const glm::vec3 &up) {
-	glm::vec3 viewingDirection = lookAtPt - viewingPos;
+	glm::vec3 viewingDirection = lookAtPt - viewingPos;//glm::vec3(0, 0, 0)
 	glm::vec3 w = glm::normalize(-viewingDirection);
 	glm::vec3 u = glm::normalize(glm::cross(up, w));
 	glm::vec3 v = glm::normalize(glm::cross(w, u));

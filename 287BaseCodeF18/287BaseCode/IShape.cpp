@@ -31,7 +31,7 @@ void IShape::getTexCoords(const glm::vec3 &pt, float &u, float &v) const {
  */
 
 glm::vec3 IShape::movePointOffSurface(const glm::vec3 &pt, const glm::vec3 &n) {
-	return pt;
+	return pt + n * 0.0001f;
 }
 
 /**
@@ -138,14 +138,14 @@ IDisk::IDisk(const glm::vec3 &pos, const glm::vec3 &normal, float rad)
  */
 
 void IDisk::findClosestIntersection(const Ray &ray, HitRecord &hit) const {
-	hit.t = 1.0f;
-	hit.surfaceNormal = glm::vec3();
-	/*
+	//hit.t = 1.0f;
+	//hit.surfaceNormal = glm::vec3();
+	
 	IPlane p(center, n);
 	p.findClosestIntersection(ray, hit);
 	if (glm::distance(hit.interceptPoint, center) > radius) {
 		hit.t = FLT_MAX;
-	}*/
+	}
 }
 
 /**
@@ -831,6 +831,108 @@ void ICylinderY::getTexCoords(const glm::vec3 &pt, float &u, float &v) const {
 	float bottom = center.y - length / 2.0f;
 	u = angle / M_2PI;
 	v = (pt.y - bottom) / length;
+}
+
+/**
+ * @fn	IClosedCylinderY::IClosedCylinderY(const glm::vec3 &pos, float rad, float len) : ICylinder(pos, rad, len, QuadricParameters::cylinderYQParams(rad))
+ * @brief	Constructor
+ * @param	pos	The position.
+ * @param	rad	The radians.
+ * @param	len	The length.
+ */
+
+IClosedCylinderY::IClosedCylinderY(const glm::vec3 &pos, float rad, float len)
+	: ICylinder(pos, rad, len, QuadricParameters::cylinderYQParams(rad)) {
+}
+
+/**
+ * @fn	void IClosedCylinderY::findClosestIntersection(const Ray &ray, HitRecord &hit) const
+ * @brief	Searches for the nearest intersection
+ * @param 		  	ray	The ray.
+ * @param [in,out]	hit	The hit.
+ */
+
+void IClosedCylinderY::findClosestIntersection(const Ray &ray, HitRecord &hit) const {
+	const glm::vec3 &rayOrigin = ray.origin;
+	const glm::vec3 &rayDirection = ray.direction;
+	glm::vec3 d1pos = glm::vec3(center.x, center.y + length / 2, center.z);
+	glm::vec3 d2pos = glm::vec3(center.x, center.y - length / 2, center.z);
+	glm::vec3 normal1 = glm::vec3(0,1,0);
+	glm::vec3 normal2 = glm::vec3(0,-1,0);
+	//IDisk d(d1pos, normal, R);
+
+	/*IPlane p(d1pos, normal);
+	p.findClosestIntersection(ray, hit);
+	if (glm::distance(hit.interceptPoint, center) > radius) {
+		hit.t = FLT_MAX;
+	}
+
+	IPlane p(d2pos, normal);
+	p.findClosestIntersection(ray, hit);
+	if (glm::distance(hit.interceptPoint, center) > radius) {
+		hit.t = FLT_MAX;
+	}*/
+
+	static HitRecord hits[2];
+	int numHits = ICylinder::findIntersections(ray, hits);
+	for (int i = 0; i < numHits; i++) {
+		if (hits[i].interceptPoint.y < center.y + length / 2 &&
+			hits[i].interceptPoint.y > center.y - length / 2) {
+				hit = hits[i];
+				return;
+		}
+	}
+	hit.t = FLT_MAX;
+	//IDisk(glm::vec3 &position, glm::vec3 &n, float R);
+}
+
+/**
+* @fn	ICylinderX::ICylinderX(const glm::vec3 &pos, float rad, float len) : ICylinder(pos, rad, len, QuadricParameters::cylinderXQParams(rad))
+* @brief	Constructor
+* @param	pos	The position.
+* @param	rad	The radians.
+* @param	len	The length.
+*/
+
+ICylinderX::ICylinderX(const glm::vec3 &pos, float rad, float len)
+	: ICylinder(pos, rad, len, QuadricParameters::cylinderXQParams(rad)) {
+}
+
+/**
+* @fn	void ICylinderX::findClosestIntersection(const Ray &ray, HitRecord &hit) const
+* @brief	Searches for the nearest intersection
+* @param 		  	ray	The ray.
+* @param [in,out]	hit	The hit.
+*/
+
+void ICylinderX::findClosestIntersection(const Ray &ray, HitRecord &hit) const {
+	const glm::vec3 &rayOrigin = ray.origin;
+	const glm::vec3 &rayDirection = ray.direction;
+	static HitRecord hits[2];
+	int numHits = ICylinder::findIntersections(ray, hits);
+	for (int i = 0; i < numHits; i++) {
+		if (hits[i].interceptPoint.x < center.x + length / 2 &&
+			hits[i].interceptPoint.x > center.x - length / 2) {
+			hit = hits[i];
+			return;
+		}
+	}
+	hit.t = FLT_MAX;
+}
+
+/**
+* @fn	void ICylinderX::getTexCoords(const glm::vec3 &pt, float &u, float &v) const
+* @brief	Gets tex coordinates
+* @param 		  	pt	The point.
+* @param [in,out]	u 	Tex coordinate u.
+* @param [in,out]	v 	Tex coordinate v.
+*/
+
+void ICylinderX::getTexCoords(const glm::vec3 &pt, float &u, float &v) const {
+	float angle = normalizeRadians(std::atan2(pt.z, pt.y));
+	float bottom = center.x - length / 2.0f;
+	u = angle / M_2PI;
+	v = (pt.x - bottom) / length;
 }
 
 /**

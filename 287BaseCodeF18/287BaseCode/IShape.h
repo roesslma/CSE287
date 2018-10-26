@@ -222,6 +222,29 @@ struct ICylinderY : public ICylinder {
 };
 
 /**
+* @struct	IClosedCylinderY
+* @brief	Implicit representation of open cylinder oriented along y-axis coordinate.
+*/
+
+struct IClosedCylinderY : public ICylinder {
+	IClosedCylinderY(const glm::vec3 &position, float R, float len);
+	
+	virtual void findClosestIntersection(const Ray &ray, HitRecord &hit) const;
+	//void getTexCoords(const glm::vec3 &pt, float &u, float &v) const;
+};
+
+/**
+* @struct	ICylinderX
+* @brief	Implicit representation of open cylinder oriented along x-axis coordinate.
+*/
+
+struct ICylinderX : public ICylinder {
+	ICylinderX(const glm::vec3 &position, float R, float len);
+	virtual void findClosestIntersection(const Ray &ray, HitRecord &hit) const;
+	void getTexCoords(const glm::vec3 &pt, float &u, float &v) const;
+};
+
+/**
  * @struct	IEllipsoid
  * @brief	Implicit representation of an ellipsoid.
  */
