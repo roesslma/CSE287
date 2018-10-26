@@ -1041,3 +1041,78 @@ void IEllipsoid::computeAqBqCq(const Ray &ray, float &Aq, float &Bq, float &Cq) 
 		//H * Ro.y +
 		I * Ro.z + J;
 }
+
+void ICone::computeAqBqCq(const Ray &ray, float &Aq, float &Bq, float &Cq) const {
+	const float &A = qParams.A;
+	const float &B = qParams.B;
+	const float &C = qParams.C;
+	const float &D = qParams.D;
+	const float &E = qParams.E;
+	const float &F = qParams.F;
+	const float &G = qParams.G;
+	const float &H = qParams.H;
+	const float &I = qParams.I;
+	const float &J = qParams.J;
+	glm::vec3 Ro = ray.origin - center;
+	const glm::vec3 &Rd = ray.direction;
+
+	Aq = A * (Rd.x*Rd.x) +
+		C * (Rd.z*Rd.z) +
+		B * (Rd.y*Rd.y);
+	//D * (Rd.x * Rd.y) +
+	//E * (Rd.x * Rd.z) +
+	//F * (Rd.y * Rd.z);
+
+	Bq = twoA * Ro.x*Rd.x +
+		twoB * Ro.y*Rd.y +
+		twoC * Ro.z*Rd.z;
+	//D * (Ro.x * Rd.y + Ro.y * Rd.x) +
+	//E * (Ro.x * Rd.z + Ro.z * Rd.x) +
+	//F * (Ro.y * Rd.z + Ro.z * Rd.y) +
+	//G * Rd.x + H * Rd.y + I * Rd.z;
+
+	Cq = A * (Ro.x * Ro.x) +
+		B * (Ro.y * Ro.y) +
+		C * (Ro.z * Ro.z) +
+		//D * (Ro.x * Ro.y) +
+		//E * (Ro.x * Ro.z) +
+		//F * (Ro.y * Ro.z) +
+		//G * Ro.x +
+		//H * Ro.y +
+		I * Ro.z + J;
+}
+
+/**
+* @fn	ICylinderY::ICylinderY(const glm::vec3 &pos, float rad, float len) : ICylinder(pos, rad, len, QuadricParameters::cylinderYQParams(rad))
+* @brief	Constructor
+* @param	pos	The position.
+* @param	rad	The radians.
+* @param	len	The length.
+*/
+
+ICone::ICone(const glm::vec3 &pos, float R, float L,
+	const QuadricParameters &qParams)
+	: IQuadricSurface(qParams, pos), radius(R), length(L) {
+}
+
+/**
+* @fn	void ICylinderY::findClosestIntersection(const Ray &ray, HitRecord &hit) const
+* @brief	Searches for the nearest intersection
+* @param 		  	ray	The ray.
+* @param [in,out]	hit	The hit.
+*/
+
+void ICone::findClosestIntersection(const Ray &ray, HitRecord &hit) const {
+	const glm::vec3 &rayOrigin = ray.origin;
+	const glm::vec3 &rayDirection = ray.direction;
+	static HitRecord hits[2];
+	int numHits = ICone::findIntersections(ray, hits);
+	for (int i = 0; i < numHits; i++) {
+		if (hits[i].interceptPoint.y < center.y &&
+			hits[i].interceptPoint.y > center.y - length) {
+			hit = hits[i];
+			return;
+		}
+	}
+	hit.t = FLT_MAX;
+}

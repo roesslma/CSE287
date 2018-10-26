@@ -253,3 +253,15 @@ struct IEllipsoid : public IQuadricSurface {
 	IEllipsoid(const glm::vec3 &position, const glm::vec3 &sz);
 	virtual void computeAqBqCq(const Ray &ray, float &Aq, float &Bq, float &Cq) const;
 };
+
+/**
+* @struct	ICylinder
+* @brief	Base class for implicit representation of a cylinder.
+*/
+
+struct ICone : public IQuadricSurface {
+	float radius, length;
+	ICone(const glm::vec3 &position, float R, float len, const QuadricParameters &qParams);
+	virtual void findClosestIntersection(const Ray &ray, HitRecord &hit) const;
+	virtual void computeAqBqCq(const Ray &ray, float &Aq, float &Bq, float &Cq) const;
+};

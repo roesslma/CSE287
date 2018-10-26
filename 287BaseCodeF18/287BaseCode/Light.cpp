@@ -72,17 +72,16 @@ color totalColor(const Material &mat, const LightColor &lightColor,
 		normal = -n;
 	}
 	glm::vec3 l = glm::normalize(lightPos - intersectionPt), r = 2 * glm::dot(l, normal) * normal - l;
-	// std::cout << specularColor(mat.specular, lightColor.specular, mat.shininess, r, v) << std::endl;
 	color amb = ambientColor(mat.ambient, lightColor.ambient);
 	color diff = diffuseColor(mat.diffuse, lightColor.diffuse, l, normal);
 	color spec = specularColor(mat.specular, lightColor.specular, mat.shininess, r, v);
 	float atten = 1.0f;
 	if (attenuationOn) {
 		atten = ATparams.factor(glm::distance(lightPos, intersectionPt));
-		// return glm::clamp((ambientColor(mat.ambient, lightColor.ambient) + diffuseColor(mat.diffuse, lightColor.diffuse, l, normal) * ATparams.factor(glm::distance(lightPos, intersectionPt)) + specularColor(mat.specular, lightColor.specular, mat.shininess, r, v) * ATparams.factor(glm::distance(lightPos, intersectionPt))), { 0 }, { 1 });
+		//return glm::clamp((ambientColor(mat.ambient, lightColor.ambient) + diffuseColor(mat.diffuse, lightColor.diffuse, l, normal) * ATparams.factor(glm::distance(lightPos, intersectionPt)) + specularColor(mat.specular, lightColor.specular, mat.shininess, r, v) * ATparams.factor(glm::distance(lightPos, intersectionPt))), { 0 }, { 1 });
 	}
 	return glm::clamp((amb + diff * atten + spec * atten), { 0 }, { 1 });
-	// return  glm::clamp((ambientColor(mat.ambient, lightColor.ambient) + diffuseColor(mat.diffuse, lightColor.diffuse, l, normal) + specularColor(mat.specular, lightColor.specular, mat.shininess, r, v)), { 0 }, { 1 }); // mat.ambient + mat.diffuse;
+	
 }
 
 /**
@@ -102,13 +101,8 @@ color PositionalLight::illuminate(const glm::vec3 &interceptWorldCoords,
 
 	glm::vec3 v = glm::normalize(eyeFrame.origin - interceptWorldCoords);
 	
-	if (!isOn) {
-		//return black;
-	}
 	if (!isOn || inShadow) {
 		return ambientColor(material.ambient, this->lightColorComponents.ambient);
-		/*return totalColor(material, this->lightColorComponents, -v, normal,
-			this->lightPosition, interceptWorldCoords, this->attenuationIsTurnedOn, this->attenuationParams);*/
 	}
 	else if (!inShadow) {
 		return totalColor(material, this->lightColorComponents, -v, normal,
@@ -133,9 +127,8 @@ color SpotLight::illuminate(const glm::vec3 &interceptWorldCoords,
 
 	glm::vec3 v = glm::normalize(eyeFrame.origin - interceptWorldCoords);
 	glm::vec3 l = glm::normalize(interceptWorldCoords - this->lightPosition);
-	// this->spotDirection
 
-	if (!isOn || inShadow || glm::dot(this->spotDirection, l) < (this->fov / 2.0f)) {
+	if (!isOn || inShadow || glm::dot(this->spotDirection, l) > (this->fov / 2.0f)) {
 		return ambientColor(material.ambient, this->lightColorComponents.ambient);
 	}
 	else if (!inShadow) {

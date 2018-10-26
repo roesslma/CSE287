@@ -14,21 +14,21 @@ float angle = 0.5f;
 float z = 0.0f;
 float inc = 0.2f;
 bool isAnimated = false;
-int numReflections = 0;
-int antiAliasing = 1;
+int numReflections = 1;
+int antiAliasing = 3;
 bool twoViewOn = false;
 Image im("usflag.ppm");
 
 std::vector<PositionalLightPtr> lights = {
 						new PositionalLight(glm::vec3(10, 10, 10), pureWhiteLight),
-						new SpotLight(glm::vec3(0, 10, 10), glm::vec3(0,-10,-1), glm::radians(10.0f), pureWhiteLight)
+						new SpotLight(glm::vec3(0, 8, 0), glm::vec3(0,-20,0), glm::radians(10.0f), pureWhiteLight)
 };
 
 PositionalLightPtr posLight = lights[0];
 SpotLightPtr spotLight = (SpotLightPtr)lights[1];
 
 FrameBuffer frameBuffer(WINDOW_WIDTH, WINDOW_HEIGHT);
-RayTracer rayTrace(black);
+RayTracer rayTrace(darkGray);
 PerspectiveCamera pCamera(glm::vec3(-10, 10, -10), ORIGIN3D, Y_AXIS, M_PI_2);
 OrthographicCamera oCamera(glm::vec3(-10, 10, -10), ORIGIN3D, Y_AXIS, 25.0f);
 RaytracingCamera *cameras[] = { &pCamera, &oCamera };
@@ -59,19 +59,18 @@ IShape *window = new IPlane(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, 
 IEllipsoid *ellipsoid = new IEllipsoid(glm::vec3(15.0f, 2.0f, 0.0f), glm::vec3(3.0f, 4.0f, 3.0f));
 ICylinderX *cylX = new ICylinderX(glm::vec3(0.0f, 2.0f, -2.0f), 3.0f, 20.0f);
 ICylinderY *cylY = new ICylinderY(glm::vec3(-10.0f, 2.0f, 12.0f), 3.0f, 8.0f);
+ICone *cone = new ICone(glm::vec3(0.0f, 18.0f, -80.0f), 10.0f, 20.0f, QuadricParameters(std::vector<float> {1.0f/9.0f, -1, 1.0f / 9.0f, 0, 0, 0, 0, 0, 0, 0}));
 
 void buildScene() {
 	scene.addObject(new VisibleIShape(plane, tin));
-	VisibleIShapePtr t;
-	//scene.addObject(t = new VisibleIShape(window, emerald));
-	//scene.addObject(new VisibleIShape(disk, bronze));
+	
 	VisibleIShapePtr p;
 	scene.addObject(new VisibleIShape(sphere, silver));
-	//scene.addObject(new VisibleIShape(ellipsoid, redPlastic));
-	scene.addObject(p = new VisibleIShape(cylX, gold));
-	scene.addObject(new VisibleIShape(cylY, polishedBronze));
 	
-	//t->material.makeTransparent(0.2, t->material.ambient);
+	scene.addObject(p = new VisibleIShape(cylX, chrome));
+	scene.addObject(new VisibleIShape(cylY, polishedBronze));
+	scene.addObject(new VisibleIShape(cone, blackRubber));
+	
 	p->setTexture(&im);
 
 	lights[0]->attenuationIsTurnedOn = true;
