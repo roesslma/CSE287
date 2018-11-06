@@ -1,3 +1,3 @@
 ﻿  Utilities.cpp
-c:\users\roesslma\desktop\287basecodef18\287basecode\utilities.cpp(1128): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
-  287BaseCode.vcxproj -> C:\Users\roesslma\Desktop\287BaseCodeF18\x64\Debug\287BaseCode.exe
+c:\users\michael.roessler\cse287\287basecodef18\287basecode\utilities.cpp(1125): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+  287BaseCode.vcxproj -> C:\Users\michael.roessler\CSE287\287BaseCodeF18\x64\Debug\287BaseCode.exe

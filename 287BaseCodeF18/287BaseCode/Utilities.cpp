@@ -915,12 +915,8 @@ glm::mat3 reflectAcrossLineYeqXplus50() {
 	return T(0, 50) * R(45) * S(1, -1) * R(-45) * T(0, -50);
 }
 
-glm::mat3 rotateAroundOwnAxisAndAroundOrigin(
-	float distFromOrigin,
-	float angleAboutOwnAxis,
-	float angleAboutOrigin) {
-	// Use trig to find point?
-	return glm::mat3();
+glm::mat3 rotateAroundOwnAxisAndAroundOrigin(float distFromOrigin, float angleAboutOwnAxis, float angleAboutOrigin) {
+	return R(angleAboutOrigin) * T(distFromOrigin, 0) * R(angleAboutOwnAxis);
 }
 
 /**
