@@ -101,6 +101,9 @@ static void timer(int id) {
 }
 
 int main(int argc, char *argv[]) {
+
+	std::cout << glm::perspective(glm::radians(125.0f), 2.0f, 0.1f, 5.0f);
+
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE);
 	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
