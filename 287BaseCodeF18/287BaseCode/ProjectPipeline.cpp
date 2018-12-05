@@ -16,7 +16,7 @@ PositionalLightPtr theLight = new PositionalLight(glm::vec3(2, 1, 3), pureWhiteL
 std::vector<LightSourcePtr> lights = { theLight };
 
 glm::vec3 position(0, 1, 4);
-float angle = 0;
+float angle = 0, hAngle = 0, vAngle = 0;
 bool isMoving = true;
 bool twoViewOn = false;
 const float SPEED = 0.1;
@@ -25,13 +25,13 @@ FrameBuffer frameBuffer(WINDOW_WIDTH, WINDOW_HEIGHT);
 
 //EShapeData plane = EShape::createECheckerBoard(copper, tin, 10, 10, 10);
 EShapeData plane = EShape::createECheckerBoard(silver, blackPlastic, 10, 10, 10);
-EShapeData cone = EShape::createECone(gold, 2, 2, 20, 10);
-EShapeData cylinder = EShape::createECylinder(chrome, 3, 1, 50, 10);
+
+//EShapeData cone = EShape::createECone(gold, 2, 2, 10, 10);
+//EShapeData cylinder = EShape::createECylinder(chrome, 3, 1, 10, 10);
 
 void renderObjects() {
-	
-	VertexOps::render(frameBuffer, cylinder, lights, glm::mat3());
-	VertexOps::render(frameBuffer, cone, lights, glm::mat3());
+	//VertexOps::render(frameBuffer, cylinder, lights, glm::mat3(T(1, 2, 3)));
+	//VertexOps::render(frameBuffer, cone, lights, glm::mat3());
 	VertexOps::render(frameBuffer, plane, lights, glm::mat3());
 }
 
@@ -75,7 +75,9 @@ void keyboard(unsigned char key, int x, int y) {
 	case 'p':	isMoving = !isMoving;
 				break;
 	case 'C':	// Do something here
-	case 'c':	break;
+	case 'c':	angle += hAngle;
+				hAngle = 0;
+				break;
 	case '?':	twoViewOn = !twoViewOn;
 				break;
 	case ESCAPE:
@@ -89,15 +91,33 @@ void keyboard(unsigned char key, int x, int y) {
 }
 
 static void special(int key, int x, int y) {
-	static const double rotateInc = glm::radians(10.0);
+	static const float rotateInc = glm::radians(10.0);
 	static const double minEL = -glm::radians(80.0);
 	static const double maxEL = glm::radians(80.0);
+	static const double minAZ = -glm::radians(90.0);
+	static const double maxAZ = glm::radians(90.0);
 	std::cout << key << std::endl;
 	switch (key) {
-	case(GLUT_KEY_LEFT):	break;
-	case(GLUT_KEY_RIGHT):	break;
-	case(GLUT_KEY_DOWN):	break;
-	case(GLUT_KEY_UP):		break;
+	case(GLUT_KEY_LEFT):	hAngle -= rotateInc;
+		if (hAngle < minAZ) {
+			hAngle = minAZ;
+		}
+		break;
+	case(GLUT_KEY_RIGHT):	hAngle += rotateInc;
+		if (hAngle > maxAZ) {
+			hAngle = maxAZ;
+		}
+		break;
+	case(GLUT_KEY_DOWN):	vAngle -= rotateInc;
+		if (vAngle < minEL) {
+			vAngle = minEL;
+		}
+		break;
+	case(GLUT_KEY_UP):		vAngle += rotateInc;
+		if (vAngle > maxEL) {
+			vAngle = maxEL;
+		}
+		break;
 	}
 	glutPostRedisplay();
 }
